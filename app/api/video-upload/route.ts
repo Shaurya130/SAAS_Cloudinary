@@ -1,9 +1,8 @@
 import { auth } from '@clerk/nextjs/server';
-import { PrismaClient } from '@prisma/client/scripts/default-index.js';
+import { PrismaClient } from '../../../generated/prisma';
 import { v2 as cloudinary, UploadStream } from 'cloudinary';
 import { transform } from 'next/dist/build/swc/generated-native';
 import { NextRequest, NextResponse } from 'next/server';
-import { title } from 'process';
 
 const prisma = new PrismaClient();
 
@@ -45,10 +44,10 @@ export async function POST(request: NextRequest) {
 
 
         const formData = await request.formData();
-        const file = formData.get("file") as File | null;
-        const title = formData.get("title") as string;
-        const description = formData.get("description") as string;
-        const originalSize = formData.get("originalSize") as string;
+        const file = (formData as any).get("file") as File | null;
+        const title = (formData as any).get("title") as string;
+        const description = (formData as any).get("description") as string;
+        const originalSize = (formData as any).get("originalSize") as string;
 
         if(!file){
             return NextResponse.json({error: "File not found"}, {status: 400})
@@ -82,7 +81,7 @@ export async function POST(request: NextRequest) {
                 publicId: result.public_id,
                 originalSize: originalSize,
                 compressedSize: String(result.bytes),
-                duration: result.duration || 0,
+                duration: String(result.duration || 0),
             }
         })
         return NextResponse.json(video)
